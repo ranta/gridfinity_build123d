@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Build123d library for gridfinity objects"
 dependencies = [
   "build123d",
-  "bd_warehouse@git+https://github.com/gumyr/bd_warehouse@48c507baac94231e2eb2c4032848719660f964dc",
+  "bd_warehouse"
 ]
 requires-python = ">=3.10"
 
