@@ -43,7 +43,12 @@ line-length = 100
 
 [tool.ruff.lint]
 select = ["ALL"]
-ignore = ["ANN101", "PLR0913", "ANN204", "S603"]
+ignore = [
+    "ANN204", # https://docs.astral.sh/ruff/rules/missing-return-type-special-method/
+    "COM812", # https://docs.astral.sh/ruff/rules/missing-trailing-comma/
+    "PLR0913", # https://docs.astral.sh/ruff/rules/too-many-arguments/
+    "S603" # https://docs.astral.sh/ruff/rules/subprocess-without-shell-equals-true/
+]
 
 [tool.ruff.lint.per-file-ignores]
 "**/tests/*" = [
@@ -51,12 +56,17 @@ ignore = ["ANN101", "PLR0913", "ANN204", "S603"]
   "D101",
   "D102",
   "D107",
-  "N802",
   "INP001",
+  "N802",
   "PT009",
   "PT027",
 ]
-"**/docs/*" = ["D100", "D101", "D102", "INP001"]
+"**/docs/*" = [
+    "D100",
+    "D101",
+    "D102",
+    "INP001"
+]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
