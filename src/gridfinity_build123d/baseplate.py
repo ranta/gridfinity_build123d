@@ -5,196 +5,28 @@ Module containing classes to create baseplates.
 
 from __future__ import annotations
 
-from abc import ABC
 from collections.abc import Iterable
 from math import isclose
-from typing import TYPE_CHECKING, override
+from typing import TYPE_CHECKING
 
 from build123d import (
     Align,
     Axis,
     BasePartObject,
-    Box,
-    BuildLine,
     BuildPart,
-    BuildSketch,
     Edge,
-    Line,
     Mode,
-    Plane,
     RotationLike,
     Shape,
-    add,  # pyright: ignore[reportUnknownVariableType]
-    extrude,
     fillet,
-    make_face,
-    mirror,
 )
 
-from gridfinity_build123d.constants import gridfinity_standard
-from gridfinity_build123d.utils import ObjectCreate, StackProfile, Utils
+from gridfinity_build123d.baseplate_block import BasePlateBlockFrame
+from gridfinity_build123d.utils import Utils
 
 if TYPE_CHECKING:
+    from gridfinity_build123d.baseplate_block import BasePlateBlock
     from gridfinity_build123d.features import Feature
-
-
-class BasePlateBlock(ObjectCreate, ABC):
-    """Single baseplate block used to construct a bigger baseplate."""
-
-    def __init__(
-        self,
-        features: Feature | list[Feature] | None = None,
-    ) -> None:
-        """BasePlateBlock interface.
-
-        Args:
-            features (Feature | list[Feature] | None, optional): Baseplate
-                features. Defaults to None.
-        """
-        if not features:
-            features = []
-
-        self.features: list[Feature] = features if isinstance(features, Iterable) else [features]
-
-
-class BasePlateBlockFrame(BasePlateBlock):
-    """Most simple kind of baseplate, only the bare minimum."""
-
-    def __init__(
-        self,
-        bottom_height: float = 0.0,
-        features: Feature | list[Feature] | None = None,
-    ) -> None:
-        """Construct BasePlateBlockFrame.
-
-        Args:
-            bottom_height (float): The height of the bottom part. Defaults to 0.0.
-            features (Feature | list[Feature] | None, optional): Baseplate
-                features. Defaults to None.
-        """
-        super().__init__(features)
-        self.bottom_height: float = bottom_height
-
-    @override
-    def create_obj(
-        self,
-        rotation: RotationLike = (0, 0, 0),
-        align: Align | tuple[Align, Align, Align] | None = None,
-        mode: Mode = Mode.ADD,
-    ) -> BasePartObject:
-        """Overwrites BasePlateBlock.create_obj."""
-        with BuildPart() as base_block:
-            _ = Utils.create_profile_block(StackProfile.ProfileType.PLATE)
-
-        if not base_block.part:  # pragma: no cover
-            msg = "block is empty"
-            raise RuntimeError(msg)
-
-        # Invert the base_block to create a baseplate frame
-        with BuildPart() as part:
-            _ = Box(
-                gridfinity_standard.grid.size,
-                gridfinity_standard.grid.size,
-                base_block.part.bounding_box().size.Z - 0.001,  # Fix for non-manifold edges
-                align=(Align.CENTER, Align.CENTER, Align.MIN),
-            )
-            _ = add(base_block.part, mode=Mode.SUBTRACT)
-
-            if self.bottom_height > 0:
-                bottom_face = part.faces().sort_by(Axis.Z)[0]
-                _ = extrude(to_extrude=bottom_face, amount=self.bottom_height, dir=(0, 0, -1))
-
-            for feature in self.features:
-                feature.apply(part)
-
-        if not part.part:  # pragma: no cover
-            msg = "Part is empty"
-            raise RuntimeError(msg)
-
-        return BasePartObject(part.part, rotation, align, mode)
-
-
-class BasePlateBlockFull(BasePlateBlock):
-    """Baseplate block with a full bottom."""
-
-    def __init__(
-        self,
-        bottom_height: float = 6.4,
-        features: Feature | list[Feature] | None = None,
-    ) -> None:
-        """Construct BaseplateBlock.
-
-        Args:
-            bottom_height (float): The height of the bottom part. Defaults to 6.4.
-            features (Feature | list[Feature] | None, optional): Baseplate
-                features. Defaults to None.
-        """
-        super().__init__(features)
-        self.bottom_height: float = bottom_height
-
-    @override
-    def create_obj(
-        self,
-        rotation: RotationLike = (0, 0, 0),
-        align: Align | tuple[Align, Align, Align] | None = None,
-        mode: Mode = Mode.ADD,
-    ) -> BasePartObject:
-        with BuildPart() as part:
-            frame = BasePlateBlockFrame().create_obj(mode=Mode.PRIVATE)
-            with BuildSketch():
-                bot_face = frame.faces().sort_by(Axis.Z)[0]
-                _ = make_face(bot_face.outer_wire().edges())
-            _ = extrude(amount=self.bottom_height, dir=(0, 0, -1))
-
-            for feature in self.features:
-                feature.apply(part)
-
-            _ = add(frame)
-
-        if not part.part:  # pragma: no cover
-            msg = "Part is empty"
-            raise RuntimeError(msg)
-
-        return BasePartObject(part.part, rotation, align, mode)
-
-
-class BasePlateBlockSkeleton(BasePlateBlockFull):
-    """Placeholder for future skeletonized baseplate."""
-
-    @override
-    def create_obj(
-        self,
-        rotation: RotationLike = (0, 0, 0),
-        align: Align | tuple[Align, Align, Align] | None = None,
-        mode: Mode = Mode.ADD,
-    ) -> BasePartObject:
-        length = 36.3
-        nodge = 9.4
-        radius = 4.25
-        length_s = length / 2 - nodge
-        length_l = length / 2
-
-        with BuildPart() as part:
-            _ = super().create_obj()
-            with BuildSketch():
-                with BuildLine() as line:
-                    ln1 = Line((0, length_l), (length_s, length_l))
-                    ln2 = Line(ln1 @ 1, (length_s, length_s))
-                    ln3 = Line(ln2 @ 1, (length_l, length_s))
-                    _ = Line(ln3 @ 1, (length_l, 0))
-                    vertex = line.vertices().sort_by_distance((length / 4, length / 4))[0]  # pyright: ignore[reportUnknownMemberType]
-                    _ = fillet(vertex, radius)
-                    _ = mirror(about=Plane.XZ)
-                    _ = mirror(about=Plane.YZ)
-
-                _ = make_face()
-            _ = extrude(amount=-self.bottom_height, mode=Mode.SUBTRACT)
-
-        if not part.part:  # pragma: no cover
-            msg = "Part is empty"
-            raise RuntimeError(msg)
-
-        return BasePartObject(part.part, rotation, align, mode)
 
 
 class BasePlate(BasePartObject):

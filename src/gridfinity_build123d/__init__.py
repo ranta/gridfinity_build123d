@@ -43,11 +43,9 @@ __all__ = [
 from .base import Base, BaseEqual
 from .baseplate import (
     BasePlate,
-    BasePlateBlockFrame,
-    BasePlateBlockFull,
-    BasePlateBlockSkeleton,
     BasePlateEqual,
 )
+from .baseplate_block import BasePlateBlockFrame, BasePlateBlockFull, BasePlateBlockSkeleton
 from .bin import Bin, StackingLip
 from .compartments import Compartment, Compartments, CompartmentsEqual
 from .connectors import GridfinityRefinedConnector
