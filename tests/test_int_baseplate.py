@@ -1,4 +1,3 @@
-import testutils
 from build123d import Axis, BuildPart
 
 from gridfinity_build123d import (
@@ -14,6 +13,7 @@ from gridfinity_build123d import (
     TopCorners,
     Weighted,
 )
+from tests import testutils
 
 
 class BasePlateTest(testutils.UtilTestCase):

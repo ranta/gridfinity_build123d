@@ -1,7 +1,8 @@
 from unittest import TestCase
 
-import testutils
 from build123d import Vector
+
+from tests import testutils
 
 
 class TestUtilsTest(TestCase):

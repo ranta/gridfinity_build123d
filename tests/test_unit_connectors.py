@@ -1,6 +1,5 @@
-import testutils
-
 from gridfinity_build123d.connectors import GridfinityRefinedConnector
+from tests import testutils
 
 
 class GridfinityRefinedConnectorTest(testutils.UtilTestCase):

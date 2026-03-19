@@ -3,7 +3,6 @@ from __future__ import annotations
 import unittest
 from unittest.mock import MagicMock, call, patch
 
-import mocks
 from build123d import (
     BuildPart,
     Vector,
@@ -15,6 +14,7 @@ from gridfinity_build123d.compartments import (
     CompartmentsEqual,
 )
 from gridfinity_build123d.features import CompartmentFeature
+from tests import mocks
 
 
 class CompartmentsTest(unittest.TestCase):

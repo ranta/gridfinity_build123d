@@ -1,5 +1,3 @@
-import testutils
-
 from gridfinity_build123d import (
     BaseEqual,
     BasePlateBlockFull,
@@ -16,6 +14,7 @@ from gridfinity_build123d import (
     GridfinityRefinedScrewHole,
     GridfinityRefinedThreadedScrewHole,
 )
+from tests import testutils
 
 
 class RefinedBaseTest(testutils.UtilTestCase):

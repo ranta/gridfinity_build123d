@@ -1,5 +1,3 @@
-import testutils
-
 from gridfinity_build123d import (
     Base,
     BaseEqual,
@@ -7,6 +5,7 @@ from gridfinity_build123d import (
     MagnetHole,
     ScrewHole,
 )
+from tests import testutils
 
 
 class BaseTest(testutils.UtilTestCase):

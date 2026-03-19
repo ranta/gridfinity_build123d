@@ -1,5 +1,3 @@
-import testutils
-
 from gridfinity_build123d import (
     Base,
     BaseEqual,
@@ -15,6 +13,7 @@ from gridfinity_build123d.compartments import (
     Compartments,
     CompartmentsEqual,
 )
+from tests import testutils
 
 
 class BinTest(testutils.UtilTestCase):

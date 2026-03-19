@@ -1,7 +1,5 @@
 from unittest.mock import ANY, MagicMock, patch
 
-import mocks
-import testutils
 from build123d import BuildPart
 
 from gridfinity_build123d.baseplate import (
@@ -10,6 +8,7 @@ from gridfinity_build123d.baseplate import (
 )
 from gridfinity_build123d.baseplate_block import BasePlateBlock
 from gridfinity_build123d.features import Feature
+from tests import mocks, testutils
 
 
 @patch("gridfinity_build123d.baseplate.Utils.place_by_grid", autospec=True)

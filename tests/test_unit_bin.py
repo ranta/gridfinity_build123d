@@ -3,7 +3,6 @@ from __future__ import annotations
 import unittest
 from unittest.mock import MagicMock
 
-import testutils
 from build123d import (
     Align,
     Box,
@@ -23,6 +22,7 @@ from gridfinity_build123d.bin import (
     StackingLip,
 )
 from gridfinity_build123d.compartments import Compartments
+from tests import testutils
 
 
 class BinTest(unittest.TestCase):

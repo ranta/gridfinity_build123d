@@ -1,4 +1,3 @@
-import testutils
 from build123d import Align, Axis, Box, BuildPart, CenterOf, Mode, Vector
 
 from gridfinity_build123d.feature_locations import (
@@ -8,6 +7,7 @@ from gridfinity_build123d.feature_locations import (
     TopCorners,
     TopMiddle,
 )
+from tests import testutils
 
 
 class TopMiddleTest(testutils.UtilTestCase):

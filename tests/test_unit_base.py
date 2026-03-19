@@ -1,12 +1,11 @@
 import unittest
 from unittest.mock import ANY, MagicMock, patch
 
-import mocks
-import testutils
 from build123d import BuildPart, Vector
 
 from gridfinity_build123d.base import Base, BaseBlock, BaseBlockPlatform, BaseEqual
 from gridfinity_build123d.features import ObjectFeature
+from tests import mocks, testutils
 
 
 @patch("gridfinity_build123d.base.Utils.create_bin_platform", autospec=True)

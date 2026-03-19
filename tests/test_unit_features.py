@@ -3,8 +3,6 @@ from __future__ import annotations
 from math import pi
 from unittest.mock import ANY, MagicMock, patch
 
-import mocks
-import testutils
 from build123d import (
     Align,
     Axis,
@@ -38,6 +36,7 @@ from gridfinity_build123d.features import (
     Weighted,
 )
 from gridfinity_build123d.utils import Direction
+from tests import mocks, testutils
 
 
 class FeatureTest(testutils.UtilTestCase):
