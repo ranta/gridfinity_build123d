@@ -9,6 +9,7 @@ __all__ = [
     "BasePlateBlockSkeleton",
     "BasePlateBottomSideRound",
     "BasePlateEqual",
+    "BasePlateSized",
     "Bin",
     "BottomCorners",
     "BottomMiddle",
@@ -44,6 +45,7 @@ from .base import Base, BaseEqual
 from .baseplate import (
     BasePlate,
     BasePlateEqual,
+    BasePlateSized,
 )
 from .baseplate_block import BasePlateBlockFrame, BasePlateBlockFull, BasePlateBlockSkeleton
 from .bin import Bin, StackingLip

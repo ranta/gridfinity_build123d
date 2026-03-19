@@ -1,10 +1,12 @@
-from build123d import Axis, BuildPart
+from build123d import Axis, BuildPart, CenterOf, Vector
+from parameterized import parameterized
 
 from gridfinity_build123d import (
     BasePlateBlockFrame,
     BasePlateBlockFull,
     BasePlateBottomSideRound,
     BasePlateEqual,
+    BasePlateSized,
     BottomCorners,
     BottomMiddle,
     Direction,
@@ -90,3 +92,51 @@ class BasePlateTest(testutils.UtilTestCase):
         # FRONT is min-Y, BACK is max-Y.
         self.assertLess(rounded_faces_y[0].area, base_faces_y[0].area)
         self.assertAlmostEqual(rounded_faces_y[-1].area, base_faces_y[-1].area, places=6)
+
+
+class BasePlateSizedTest(testutils.UtilTestCase):
+    @parameterized.expand(  # type: ignore[untyped-decorator]
+        [
+            # centered
+            ({}, Vector(0.0, 0.0, 2.3245)),
+            # left_front
+            (
+                {"grid_align_x": Direction.LEFT, "grid_align_y": Direction.FRONT},
+                Vector(-4.0, -4.0, 2.3245),
+            ),
+            # right_back
+            (
+                {"grid_align_x": Direction.RIGHT, "grid_align_y": Direction.BACK},
+                Vector(4.0, 4.0, 2.3245),
+            ),
+            # left_back
+            (
+                {"grid_align_x": Direction.LEFT, "grid_align_y": Direction.BACK},
+                Vector(-4.0, 4.0, 2.3245),
+            ),
+            # left_center
+            (
+                {"grid_align_x": Direction.LEFT},
+                Vector(-4.0, 0, 2.3245),
+            ),
+        ]
+    )
+    def test_base_plate_sized_aligns_top_opening_from_requested_anchor(
+        self,
+        kwargs: dict[str, Direction],
+        expected_center: Vector,
+    ) -> None:
+        base_plate = BasePlateSized(50, 50, **kwargs)
+
+        top_face = base_plate.faces().sort_by(Axis.Z)[-1]
+        top_inner_wire_centers = [
+            wire.center(CenterOf.BOUNDING_BOX) for wire in top_face.inner_wires()
+        ]
+        self.assertEqual(1, len(top_inner_wire_centers))
+
+        self.assertVectorAlmostEqual(
+            (expected_center.X, expected_center.Y, expected_center.Z),
+            top_inner_wire_centers[0],
+            places=6,
+        )
+        self.assertVectorAlmostEqual((50, 50, 4.649), base_plate.bounding_box().size)

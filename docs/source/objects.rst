@@ -112,7 +112,6 @@ BasePlates
 
         .. image:: ../assets/base_plate_equal.png
 
-
     .. grid-item-card:: :class:`BasePlate`
 
         .. raw:: html
@@ -178,6 +177,28 @@ BasePlates
             </details>
 
         .. image:: ../assets/base_plate_weighted.png
+
+    .. grid-item-card:: :class:`BasePlateSized`
+
+        .. raw:: html
+
+            <details>
+            <summary>source</summary>
+
+        .. testcode::
+
+            BasePlateSized(
+                width=105,
+                depth=70,
+                grid_align_x=Direction.LEFT,
+                grid_align_y=Direction.FRONT,
+            )
+
+        .. raw:: html
+
+            </details>
+
+        .. image:: ../assets/base_plate_sized.png
 
     .. grid-item-card:: :class:`BasePlateBottomSideRound` — one side
 

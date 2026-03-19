@@ -5,9 +5,15 @@ from build123d import BuildPart
 from gridfinity_build123d.baseplate import (
     BasePlate,
     BasePlateEqual,
+    BasePlateSized,
 )
-from gridfinity_build123d.baseplate_block import BasePlateBlock
+from gridfinity_build123d.baseplate_block import (
+    BasePlateBlock,
+    BasePlateBlockFrame,
+    BasePlateBlockFull,
+)
 from gridfinity_build123d.features import Feature
+from gridfinity_build123d.utils import Direction
 from tests import mocks, testutils
 
 
@@ -105,3 +111,52 @@ class BasePlateEqualTest(testutils.UtilTestCase):
             ANY,
             ANY,
         )
+
+
+class BasePlateSizedTest(testutils.UtilTestCase):
+    def test_base_plate_sized_requires_at_least_one_grid_cell(self) -> None:
+        with self.assertRaises(ValueError):
+            BasePlateSized(41.9, 42)
+
+        with self.assertRaises(ValueError):
+            BasePlateSized(42, 41.9)
+
+    def test_base_plate_sized_rejects_invalid_grid_align_x(self) -> None:
+        with self.assertRaises(ValueError):
+            BasePlateSized(50, 50, grid_align_x=Direction.FRONT)
+
+    def test_base_plate_sized_rejects_invalid_grid_align_y(self) -> None:
+        with self.assertRaises(ValueError):
+            BasePlateSized(50, 50, grid_align_y=Direction.LEFT)
+
+    def test_base_plate_sized_accepts_exact_single_cell_size(self) -> None:
+        """Verify minimum accepted size (42 mm = 1 grid cell)."""
+        base_plate = BasePlateSized(42, 42)
+        bbox = base_plate.bounding_box()
+        self.assertVectorAlmostEqual((42, 42, 4.649), bbox.size)
+
+    def test_base_plate_sized_floors_dimensions_to_full_cells(self) -> None:
+        """Verify that non-multiples of 42 are accepted and creates a valid baseplate."""
+        base_plate = BasePlateSized(83, 85)
+        bbox = base_plate.bounding_box()
+
+        # Outer dimensions should match the requested size
+        self.assertAlmostEqual(83, bbox.size.X, places=2)
+        self.assertAlmostEqual(85, bbox.size.Y, places=2)
+
+        # Should have reasonable geometry
+        self.assertAlmostEqual(base_plate.volume, 18916.080061292214)
+        self.assertAlmostEqual(base_plate.area, 11237.060313619717)
+
+    def test_base_plate_sized_custom_block_full(self) -> None:
+        """Verify custom block produces different geometry than frame."""
+        base_plate_frame = BasePlateSized(50, 50, baseplate_block=BasePlateBlockFrame())
+        base_plate_full = BasePlateSized(50, 50, baseplate_block=BasePlateBlockFull())
+
+        bbox_frame = base_plate_frame.bounding_box()
+        bbox_full = base_plate_full.bounding_box()
+
+        # Full block should be taller
+        self.assertLess(bbox_frame.size.Z, bbox_full.size.Z)
+        # Full block should have more volume
+        self.assertLess(base_plate_frame.volume, base_plate_full.volume)

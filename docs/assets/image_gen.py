@@ -19,6 +19,7 @@ from gridfinity_build123d import (
     BasePlateBlockSkeleton,
     BasePlateBottomSideRound,
     BasePlateEqual,
+    BasePlateSized,
     Bin,
     BottomCorners,
     BottomMiddle,
@@ -252,6 +253,16 @@ Convert.part_to_png(
         size_y=2,
     ),
     "base_plate_equal",
+    CameraPosition.CAMERA_TOP,
+)
+Convert.part_to_png(
+    BasePlateSized(
+        width=105,
+        depth=70,
+        grid_align_x=Direction.LEFT,
+        grid_align_y=Direction.FRONT,
+    ),
+    "base_plate_sized",
     CameraPosition.CAMERA_TOP,
 )
 Convert.part_to_png(
