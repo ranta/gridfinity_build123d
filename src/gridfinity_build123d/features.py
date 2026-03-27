@@ -795,7 +795,7 @@ class Label(CompartmentFeature):
             chamfer_face = context.faces().sort_by(Axis.Z)[-2]
             _ = extrude(
                 to_extrude=chamfer_face,
-                amount=1,
+                amount=gf_bin.label.thickness,
                 dir=(0, 0, -1),
                 mode=Mode.SUBTRACT,
             )

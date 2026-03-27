@@ -87,20 +87,23 @@ class Compartment:
                 part.edges()
                 .filter_by(Axis.Z)
                 .filter_by_position(
-                    Axis.Z,
+                    axis=Axis.Z,
                     minimum=bbox.min.Z,
-                    maximum=bbox.max.Z - 1.1,
+                    maximum=bbox.max.Z - gf_bin.label.thickness,
+                    inclusive=(True, False),
                 )
             )
 
-            # Select the rest of the edges (excluding the top face and lower
-            # edge of the label)
+            # Round the inner vertical edges (top-down 2D corners)
             _ = fillet(fillet_edges, gf_bin.inner_radius_v)
 
+            # Select the rest of the edges (excluding the top face and lower edge of the label)
+            # (Bottom edges and underside of the label)
             fillet_edges = part.edges().filter_by_position(
-                Axis.Z,
+                axis=Axis.Z,
                 minimum=bbox.min.Z,
-                maximum=bbox.max.Z - 1.1,
+                maximum=bbox.max.Z - gf_bin.label.thickness,
+                inclusive=(True, False),
             )
 
             _ = fillet(fillet_edges, gf_bin.inner_radius)

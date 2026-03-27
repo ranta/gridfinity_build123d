@@ -66,6 +66,7 @@ class gf_bin:
 
         width: float = 12
         angle: float = 36
+        thickness: float = 1
 
     @dataclass
     class scoop:
