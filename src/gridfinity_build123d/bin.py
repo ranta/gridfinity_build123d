@@ -31,7 +31,7 @@ from build123d import (
 from .utils import Direction, StackProfile, Utils
 
 if TYPE_CHECKING:
-    from .compartments import Compartments
+    from .compartments import Compartments, CompartmentsSized
 
 
 class Bin(BasePartObject):
@@ -42,7 +42,7 @@ class Bin(BasePartObject):
         base: Part,
         height: float = 0,
         height_in_units: int = 0,
-        compartments: Compartments | None = None,
+        compartments: Compartments | CompartmentsSized | None = None,
         lip: StackingLip | None = None,
         rotation: RotationLike = (0, 0, 0),
         align: Align | tuple[Align, Align, Align] | None = None,
@@ -56,7 +56,8 @@ class Bin(BasePartObject):
                 defined.Defaults to 0.
             height_in_units (int, optional): Height defined by gridfinity units. Can't be used when
                 height is defined. Defaults to 0.
-            compartments (Compartments | None, optional): Compartments of the bin, Defaults to None.
+            compartments (Compartments | CompartmentsSized | None, optional): Compartments of the
+                bin, Defaults to None.
             lip (StackingLip, optional): A lip object which should be added. Size added due to the
                 lip is not included in "height". Defaults to None.
             rotation (RotationLike, optional): angles to rotate about axes. Defaults to (0, 0, 0).

@@ -17,6 +17,7 @@ __all__ = [
     "Compartment",
     "Compartments",
     "CompartmentsEqual",
+    "CompartmentsSized",
     "Direction",
     "FeatureLocation",
     "FeatureLocation",
@@ -49,7 +50,7 @@ from .baseplate import (
 )
 from .baseplate_block import BasePlateBlockFrame, BasePlateBlockFull, BasePlateBlockSkeleton
 from .bin import Bin, StackingLip
-from .compartments import Compartment, Compartments, CompartmentsEqual
+from .compartments import Compartment, Compartments, CompartmentsEqual, CompartmentsSized
 from .connectors import GridfinityRefinedConnector
 from .feature_locations import (
     BottomCorners,

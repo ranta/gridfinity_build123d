@@ -275,6 +275,112 @@ class Compartments:
         return count
 
 
+class CompartmentsSized:
+    """Compartments collection with explicitly sized compartments.
+
+    Unlike Compartments and CompartmentsEqual, which stretch compartments to fill the full
+    available area, CompartmentsSized places each compartment at its exact requested size.
+    Compartments are arranged side by side along the x-axis and centered as a group, both
+    horizontally and vertically, within the available area. Any space left over once every
+    compartment is placed is not cut away, it stays solid.
+
+    Example:
+        sizes = [(30, 120), (30, 120), (30, 120), (30, 120)]
+        Will generate 4 identical 30x120mm compartments, arranged side by side and centered.
+    """
+
+    def __init__(
+        self,
+        sizes: list[tuple[float, float]],
+        compartment_list: Compartment | list[Compartment] | None = None,
+        inner_wall: float = 1.2,
+        outer_wall: float = 0.95,
+    ):
+        """Construct sized compartment collection.
+
+        Args:
+            sizes (list[tuple[float, float]]): size_x, size_y of each compartment, in
+                left-to-right placement order.
+            compartment_list (Compartment | list[Compartment] | None, optional): Compartment
+                or list of compartments, one per entry in sizes when a list is given.
+                Defaults to Compartment().
+            inner_wall (float, optional): space between compartments. Defaults to 1.2.
+            outer_wall (float, optional): minimum required space between the compartments
+                and the edge of the available area. Defaults to 0.95.
+        """
+        if not sizes:
+            msg = "sizes can't be empty"
+            raise ValueError(msg)
+        if compartment_list is None:
+            compartment_list = Compartment()
+
+        self.sizes: list[tuple[float, float]] = sizes
+        self.compartment_list: Compartment | list[Compartment] = compartment_list
+        self.inner_wall: float = inner_wall
+        self.outer_wall: float = outer_wall
+
+    def create(
+        self,
+        size_x: float,
+        size_y: float,
+        height: float,
+        rotation: RotationLike = (0, 0, 0),
+        align: Align | tuple[Align, Align, Align] = Align.CENTER,
+        mode: Mode = Mode.ADD,
+    ) -> BasePartObject:
+        """Create sized compartments object.
+
+        Args:
+            size_x (float): size of the available area on the x-axis
+            size_y (float): size of the available area on the y-axis
+            height (float): Height of compartments
+            rotation (RotationLike, optional): angles to rotate about axes. Defaults to (0, 0, 0).
+            align (Union[Align, tuple[Align, Align, Align]], optional): align min, center, or max
+                of object. Defaults to Align.CENTER.
+            mode (Mode, optional): combination mode. Defaults to Mode.ADD.
+
+        Returns:
+            BasePartObject: 3d object
+        """
+        total_width = sum(size[0] for size in self.sizes) + self.inner_wall * (len(self.sizes) - 1)
+
+        if total_width + self.outer_wall * 2 > size_x:
+            msg = (
+                f"compartments require {total_width}mm of width, plus {self.outer_wall}mm "
+                f"outer wall on each side, but only {size_x}mm is available"
+            )
+            raise ValueError(msg)
+
+        for _, comp_size_y in self.sizes:
+            if comp_size_y + self.outer_wall * 2 > size_y:
+                msg = (
+                    f"compartment of size_y={comp_size_y}mm plus {self.outer_wall}mm outer "
+                    f"wall on each side doesn't fit within the available {size_y}mm"
+                )
+                raise ValueError(msg)
+
+        with BuildPart() as part:
+            loc_x = -total_width / 2
+            for index, (comp_size_x, comp_size_y) in enumerate(self.sizes):
+                loc_x += comp_size_x / 2
+
+                if isinstance(self.compartment_list, Iterable):
+                    create_call = self.compartment_list[index].create
+                else:
+                    create_call = self.compartment_list.create
+
+                with Locations((loc_x, 0)):
+                    _ = create_call(size_x=comp_size_x, size_y=comp_size_y, height=height)
+
+                loc_x += comp_size_x / 2 + self.inner_wall
+
+        if not part.part:  # pragma: no cover
+            msg = "Part is empty"
+            raise RuntimeError(msg)
+
+        return BasePartObject(part=part.part, rotation=rotation, align=align, mode=mode)
+
+
 class CompartmentsEqual(Compartments):
     """Equal spaced compartment collection."""
 

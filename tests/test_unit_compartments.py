@@ -12,6 +12,7 @@ from gridfinity_build123d.compartments import (
     Compartment,
     Compartments,
     CompartmentsEqual,
+    CompartmentsSized,
 )
 from gridfinity_build123d.features import CompartmentFeature
 from tests import mocks
@@ -262,6 +263,121 @@ class CompartmentsEqualTest(unittest.TestCase):
             inner_wall=1.2,
             outer_wall=0.95,
         )
+
+
+class CompartmentsSizedTest(unittest.TestCase):
+    def test_compartments_sized_raises_on_empty_sizes(self) -> None:
+        with self.assertRaises(ValueError):
+            CompartmentsSized(sizes=[])
+
+    def test_compartments_sized_default_compartment(self) -> None:
+        comp_box = mocks.BoxAsMock(10, 10, 10)
+
+        with patch(
+            "gridfinity_build123d.compartments.Compartment",
+            autospec=True,
+        ) as comp_mock:
+            comp_mock.return_value.create.side_effect = comp_box.create
+
+            with BuildPart() as part:
+                CompartmentsSized(sizes=[(20, 30)]).create(
+                    size_x=100,
+                    size_y=100,
+                    height=50,
+                )
+
+        comp_mock.return_value.create.assert_called_once_with(
+            size_x=20,
+            size_y=30,
+            height=50,
+        )
+        bbox = part.part.bounding_box()
+        self.assertEqual(Vector(10, 10, 10), bbox.size)
+        self.assertAlmostEqual(1000.0, part.part.volume)
+
+    def test_compartments_sized_places_compartments_side_by_side(self) -> None:
+        comp_mock = MagicMock(spec=Compartment)
+        comp_box = mocks.BoxAsMock(10, 10, 10)
+        comp_mock.create.side_effect = comp_box.create
+
+        with BuildPart() as part:
+            CompartmentsSized(
+                sizes=[(20, 10), (30, 10), (10, 10)],
+                compartment_list=comp_mock,
+                inner_wall=1,
+                outer_wall=3,
+            ).create(
+                size_x=100,
+                size_y=100,
+                height=50,
+            )
+
+        comp_mock.create.assert_has_calls(
+            [
+                call(size_x=20, size_y=10, height=50),
+                call(size_x=30, size_y=10, height=50),
+                call(size_x=10, size_y=10, height=50),
+            ],
+        )
+        bbox = part.part.bounding_box()
+        self.assertEqual(Vector(57, 10, 10), bbox.size)
+        self.assertAlmostEqual(3000.0, part.part.volume)
+
+    def test_compartments_sized_multiple_types(self) -> None:
+        comp_mock_1 = MagicMock(spec=Compartment)
+        comp_mock_2 = MagicMock(spec=Compartment)
+
+        comp_box = mocks.BoxAsMock(10, 10, 10)
+        comp_mock_1.create.side_effect = comp_box.create
+        comp_mock_2.create.side_effect = comp_box.create
+
+        with BuildPart() as part:
+            CompartmentsSized(
+                sizes=[(20, 20), (30, 30)],
+                compartment_list=[comp_mock_1, comp_mock_2],
+                inner_wall=1,
+                outer_wall=3,
+            ).create(
+                size_x=100,
+                size_y=100,
+                height=50,
+            )
+
+        comp_mock_1.create.assert_called_once_with(size_x=20, size_y=20, height=50)
+        comp_mock_2.create.assert_called_once_with(size_x=30, size_y=30, height=50)
+
+        bbox = part.part.bounding_box()
+        self.assertEqual(Vector(36, 10, 10), bbox.size)
+        self.assertAlmostEqual(2000.0, part.part.volume)
+
+    def test_compartments_sized_raises_when_too_wide(self) -> None:
+        comp_mock = MagicMock(spec=Compartment)
+
+        with self.assertRaises(ValueError):
+            CompartmentsSized(
+                sizes=[(50, 10), (50, 10)],
+                compartment_list=comp_mock,
+                inner_wall=1,
+                outer_wall=3,
+            ).create(
+                size_x=100,
+                size_y=100,
+                height=50,
+            )
+
+    def test_compartments_sized_raises_when_too_deep(self) -> None:
+        comp_mock = MagicMock(spec=Compartment)
+
+        with self.assertRaises(ValueError):
+            CompartmentsSized(
+                sizes=[(10, 95)],
+                compartment_list=comp_mock,
+                outer_wall=3,
+            ).create(
+                size_x=100,
+                size_y=100,
+                height=50,
+            )
 
 
 class CompartmentTest(unittest.TestCase):
